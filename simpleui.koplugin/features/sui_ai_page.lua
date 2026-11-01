@@ -52,11 +52,12 @@ button.primary{background:var(--accent);color:var(--bg);border-color:var(--accen
 <button type="button" id="addPrompt" style="margin-top:10px;width:100%">添加一条</button></section>
 <p class="note">配置页只在 Kindle 显示二维码时可用，保存后会自动关闭。家里的局域网内是普通 HTTP，请只在你信任的 Wi-Fi 下使用。</p>
 </main>
-<div class="bar"><div class="row"><button type="button" id="test">测试连接</button><button type="button" class="primary" id="save">保存到 Kindle</button></div><p id="status"></p></div>
+<div class="bar"><div class="row"><button type="button" id="test" disabled>测试连接</button><button type="button" class="primary" id="save" disabled>保存到 Kindle</button></div><p id="status"></p></div>
 <script>
 const T=new URLSearchParams(location.search).get('t');const $=id=>document.getElementById(id);
 const LANG={'zh-CN':'简体中文','zh-TW':'繁體中文','en':'English','ja':'日本語','ko':'한국어'};
 let S=null,provider='deepseek',prompts=[];
+$('test').disabled=true;$('save').disabled=true;
 const ERR={'Invalid API key':'API Key 格式不对','Invalid service URL':'接口地址格式不对','Invalid model name':'模型名称格式不对','Unknown service':'请选择服务','Fill in the service, model and API key first':'请先填好服务、模型和 API Key','Network request failed':'Kindle 没能连上这个服务','AI is not set up':'请先填好服务、模型和 API Key','Cancelled':'测试被取消','Forbidden':'配置页已过期，请在 Kindle 上重新打开'};
 function zh(m){m=String(m||'');return ERR[m]||m}
 function status(text,cls){const s=$('status');s.textContent=text;s.className=cls||''}
@@ -78,8 +79,10 @@ function fillModelSelect(id,list){const sel=$(id);const prev=readModel(id);sel.i
  sel.value=list.indexOf(prev)>=0?prev:'';}
 function readModel(id){const manual=$(id+'_custom');if(manual&&manual.value.trim())return manual.value.trim();
  const sel=$(id);return sel&&sel.value?sel.value:''}
+// A <select> exposes its options; some test DOMs only expose children.
+function modelOptions(sel){return sel?Array.from(sel.options||sel.children||[]):[]}
 function setModel(id,value){const manual=$(id+'_custom');if(manual)manual.value='';
- const sel=$(id);if(!sel)return;const hit=[...sel.options].find(o=>o.value===value);
+ const sel=$(id);if(!sel)return;const hit=modelOptions(sel).find(o=>o.value===value);
  sel.value=hit?value:'';
  if(!hit&&value){const o=document.createElement('option');o.value=value;o.textContent=value;sel.appendChild(o);sel.value=value}}
 function fillModels(list){fillModelSelect('chat_model',list);fillModelSelect('translate_model',list);
@@ -106,8 +109,8 @@ api('/api/state').then(s=>{S=s;const c=s.config;provider=c.provider||'deepseek';
  ['answer_lang','translate_to'].forEach(id=>{const sel=$(id);s.languages.forEach(l=>{const o=document.createElement('option');o.value=l;o.textContent=LANG[l]||l;sel.appendChild(o)});sel.value=c[id]});
  $('base').value=c.base||'';$('thinking').checked=!!c.thinking;
  selectProvider(provider,false);setModel('chat_model',c.chat_model||'');setModel('translate_model',c.translate_model||'');
- prompts=Array.isArray(c.quick_prompts)?c.quick_prompts.filter(p=>p&&p.name&&p.prompt).map(p=>({name:p.name,prompt:p.prompt})):[];
- renderPrompts()}).catch(e=>status('无法读取设置：'+e.message,'err'));
+ prompts=(Array.isArray(c.quick_prompts)?c.quick_prompts:[]).filter(p=>p&&typeof p.name==='string'&&typeof p.prompt==='string').slice(0,20).map(p=>({name:p.name,prompt:p.prompt}));
+ renderPrompts();$('test').disabled=false;$('save').disabled=false}).catch(e=>status('无法读取设置：'+e.message,'err'));
 </script></body></html>]==]
 
 return M

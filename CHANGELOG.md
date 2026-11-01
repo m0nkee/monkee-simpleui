@@ -1,6 +1,30 @@
 # 更新记录 / Changelog
 
+## v3.0.0-qiaomu.19 — 测试版 / Prerelease
+
+- 修复手机扫码配置 AI 时，空自定义动作列表被 Lua JSON 编码为对象，导致页面报 `quick_prompts.map is not a function`、设置加载中断的问题。
+- 兼容空对象、空数组、缺失字段和无效条目，保留有效自定义动作；设置加载完成前禁用测试与保存，防止提交不完整的表单。
+- 新增执行实际页面 JavaScript 的回归，覆盖首次空配置、已有动作、测试请求及加载失败；API Key 不会回传给页面。
+
+English: handle empty Lua objects and malformed custom-action lists on the phone setup page. Enable Test/Save only after settings load successfully. Execute the shipped JavaScript in regression tests for initial setup, custom actions and failed state requests.
+
+## v3.0.0-qiaomu.18 — 测试版 / Prerelease
+
+- 修复 RSS 中文解读里同段多个 Markdown 链接合并、地址中的括号及下划线破坏图片和链接的问题；保留链接文字、文字强调和代码示例。
+- 图片下载与正文渲染共用解析结果，兼容带标题的图片及 HTML 延迟加载图片；已缓存的文章联网打开时有限重试缺失图片，图片补齐后自动重建 EPUB，保留阅读设置与批注。
+- 使用 KOReader v2026.07.1 的真实 Markdown 解析器回归；在用户报告的最新文章中核对 49 个链接、9 张图片地址，与独立 CommonMark 结果一致。Paperwhite 5 SE 原生 LuaJIT 与 HTTPS 已实测下载一张图片并生成含图 EPUB；实际阅读画面仍待用户确认。
+
+English: fix merged inline Markdown links and broken image URLs, share parsing between downloads and rendering, and retry missing images in cached articles once per session while online. Rebuild EPUBs when image availability changes without removing reading settings or annotations. Real KOReader parser regression passes; physical Kindle rendering and HTTPS remain pending.
+
 ## v3.0.0-qiaomu.17 — 测试版 / Prerelease
+
+- 修复新安装时默认底栏加上微信读书后占满位置，导致「资讯」入口缺失的问题；默认布局的「关闭」移回菜单，底栏保留「资讯」和「微信读书」。
+- 一次性修复 .15/.16 已错误标记完成的默认底栏；保留自定义满栏及修复后的手动选择，没有空位时不再误报添加成功。
+- 回归覆盖首次启动、连续重启、旧配置迁移、自定义满栏及空位恢复；文件安装与真实设备画面验收分开记录。
+
+English: replace Power in the stock navbar with News, retaining WeRead. Repair the failed .15/.16 stock migration once, preserve custom full bars and subsequent manual choices, and retry incomplete insertion when space becomes available.
+
+## v3.0.0-qiaomu.20 — 测试版 / Prerelease
 
 - 手机配置页：接口地址对所有服务都可编辑（留空用预设默认地址），新增「获取模型列表」按钮，Kindle 读取服务的 `/models` 后以下拉框选模型；模型名也可手动填写，照顾火山方舟接入点 ID 这类不在列表里的模型。
 - 新增「传书到 Kindle」：Kindle 显示二维码，手机选书直接上传到 `documents` 文件夹（可指定子文件夹），书库立刻能看到。复用 AI 配置页的网页骨架，multipart 解析器自研，单本上限 200 MB，不再受 64 KB 请求体限制。
@@ -11,6 +35,7 @@
 - 在一台 Kindle Paperwhite 3（黑色，序列号 G090G1）上实机验证：配置页正常打开、模型下拉可用、手机传书成功并出现在书架。另一台白色设备本轮未更新。
 
 English: editable endpoint for every service plus a "Fetch model list" button that turns the model into a dropdown; a new phone-to-Kindle book upload that writes into `documents` (up to 200 MB, no 64 KB body limit); the "Qiaomu" branding replaced with plain "AI Settings"; `.kfx` dropped from the shelf because KOReader cannot open it; the boot-stalling update check fixed (prerelease-only repo, failed checks now back off 24 h / 3 d / 7 d); and the phone page's empty-list JSON bug fixed. Verified on one Kindle Paperwhite 3 (black, serial G090G1): settings page loads, model dropdown works, book upload lands on the shelf. The second device was not updated.
+
 
 ## v3.0.0-qiaomu.16 — 测试版 / Prerelease
 
