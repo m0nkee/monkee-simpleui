@@ -1,5 +1,13 @@
 # 更新记录 / Changelog
 
+## v3.0.0-qiaomu.21 — 测试版 / Prerelease
+
+- 书架只列出 KOReader 真能打开的格式：白名单改为对齐 KOReader 自己的文档注册表（`frontend/document/documentregistry.lua`），补齐 EPUB/MOBI/AZW3/AZW/FB2/FB3/DOC/DOCX/RTF/ODT/TXT/MD/HTML/CHM/PDB/PRC/DJVU/CBZ/CBR/XPS 等；`.kfx`、`.azk`、`.tpz` 等打不开的格式不再出现在书架上，点开也不会再报「格式不支持」。
+- 手机传书页的文件选择器同步这份白名单，并说明 KFX 请用 Kindle 原生阅读。
+- 回归覆盖：注册表内的格式仍然显示，注册表外的格式（KFX、AZK、TPZ、ZIP 等压缩包）一律隐藏。
+
+English: the shelf now lists only the formats KOReader can actually open. The whitelist mirrors KOReader's own document registry, so unreadable containers such as `.kfx` no longer appear on the shelf and can no longer fail with "format not supported"; the phone upload page uses the same list.
+
 ## v3.0.0-qiaomu.19 — 测试版 / Prerelease
 
 - 修复手机扫码配置 AI 时，空自定义动作列表被 Lua JSON 编码为对象，导致页面报 `quick_prompts.map is not a function`、设置加载中断的问题。

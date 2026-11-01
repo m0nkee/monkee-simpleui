@@ -110,6 +110,26 @@ assert(Upload._destinationDir("../etc")==nil,"a parent folder is refused")
 assert(Upload._destinationDir("/etc")==nil,"an absolute path is refused")
 ''')
 
+# --- the upload page uses the same format list as the shelf ----------------
+# A file the shelf would hide must not be offered by the picker either.
+lua.execute(r'''
+local Upload = require("features/sui_upload_web")
+local Scan = require("engines/sui_library_scan")
+local html = require("features/sui_upload_page").HTML
+
+local accept = html:match('accept="([^"]*)"')
+assert(accept, "the file picker declares an accept list")
+
+for ext in accept:gmatch("%.([%w]+)") do
+  assert(Scan.BOOK_EXTS[ext:lower()],
+    ext.." is offered by the upload page but the shelf cannot open it")
+end
+
+assert(not accept:find("kfx",1,true), "KFX is not offered — KOReader cannot open it")
+assert(accept:find(".epub",1,true) and accept:find(".azw3",1,true),
+  "the common formats stay offered")
+''')
+
 # --- the shared web server: token and body size ---------------------------
 lua.execute(r'''
 local Web = require("infra/sui_webserver")

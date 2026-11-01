@@ -112,9 +112,10 @@ assert(type(stored["sui_upd_last_check"])=="number" and stored["sui_upd_last_che
 assert(stored["sui_upd_fail_count"]==1,"the failure counter advances")
 ''')
 
-# --- Library scan: no KFX --------------------------------------------------
+# --- Library scan: only formats KOReader can open --------------------------
 # KOReader cannot open KFX at all, so listing it produced books that appeared
-# on the shelf and failed with "format not supported".
+# on the shelf and failed with "format not supported". The whitelist mirrors
+# KOReader's own document registry, so anything outside it stays hidden.
 lua.execute(r'''
 package.loaded["logger"] = { info=function() end, warn=function() end, dbg=function() end }
 package.loaded["device"] = { home_dir="/mnt/us/documents" }
@@ -131,7 +132,26 @@ local Scan = require("engines/sui_library_scan")
 local exts = Scan.BOOK_EXTS
 assert(exts.epub and exts.mobi and exts.azw3 and exts.azw and exts.pdf,"openable formats stay listed")
 assert(exts.kfx==nil,"KFX is not listed — KOReader cannot open it")
+
+-- Formats KOReader's document registry does not register stay hidden, so a
+-- tap on them can no longer end in "format not supported".
+for _, ext in ipairs({ "kfx", "azk", "kfxzip", "tpz", "mobi64", "exe", "iso" }) do
+  assert(exts[ext]==nil, ext.." is not listed — KOReader cannot open it")
+end
+
+-- The formats KOReader does register remain visible.
+for _, ext in ipairs({ "epub", "mobi", "azw3", "azw", "pdf", "fb2", "fb3",
+                       "txt", "md", "doc", "docx", "docm", "rtf", "odt",
+                       "htm", "html", "xhtml", "xml", "chm", "pdb", "prc",
+                       "djvu", "djv", "cbz", "cbr", "cbt", "xps", "cfb" }) do
+  assert(exts[ext]==true, ext.." stays listed — KOReader can open it")
+end
+
+-- Archive wrappers are not books.
+for _, ext in ipairs({ "zip", "tar" }) do
+  assert(exts[ext]==nil, ext.." is not listed — it is an archive, not a book")
+end
 ''')
 
 print('PASS: updater parses the prerelease release list, a failed check still '
-      'throttles, the library scan no longer lists KFX.')
+      'throttles, the library scan lists only formats KOReader can open.')

@@ -39,14 +39,33 @@ end
 
 
 -- Extensions KOReader can open. Single source of truth.
--- NOTE: .kfx is intentionally absent. KOReader cannot open KFX at all
--- (Amazon's DRM container), so listing it here put unopenable books on the
--- shelf and only produced a "format not supported" error. KFX titles stay
--- readable in the stock Kindle reader.
+--
+-- The list mirrors KOReader's own document registry
+-- (frontend/document/documentregistry.lua): the extensions registered by
+-- credocument / pdfdocument / djvudocument. Anything outside it is not
+-- openable, so listing it on the shelf only produced a "format not
+-- supported" error when the book was tapped.
+--
+-- Notes:
+--   * .kfx is absent — KOReader cannot open KFX at all (Amazon's DRM
+--     container). KFX titles stay readable in the stock Kindle reader.
+--   * .azw3 is listed even though KOReader registers only "azw": AZW3 is
+--     the same MOBI/KF8 container family and CREngine opens it by content.
+--   * .cbr needs RAR support; libarchive on the Kindle build ships RAR5
+--     decoding, so it stays listed.
+--   * "*.zip" companions (fb2.zip, txt.zip, ...) are archive wrappers,
+--     not books, and are skipped.
 LibraryScan.BOOK_EXTS = {
-    epub = true, mobi = true, azw3 = true, azw = true,
-    pdf = true, djvu = true, fb2 = true, cbz = true, cbr = true,
-    doc = true, docx = true, rtf = true, txt = true,
+    -- creDocument (crengine)
+    epub = true, mobi = true, azw3 = true, azw = true, fb2 = true, fb3 = true,
+    doc = true, docx = true, docm = true, rtf = true, txt = true, odt = true,
+    htm = true, html = true, xhtml = true, xml = true, md = true, log = true,
+    chm = true, pdb = true, prc = true, tcr = true, cfb = true,
+    -- pdfDocument (mupdf)
+    pdf = true, xps = true, cbz = true, cbr = true, cbt = true,
+    pptx = true, xlsx = true,
+    -- djvuDocument
+    djvu = true, djv = true,
 }
 
 local MAX_DEPTH  = 8      -- generous but bounded — no runaway recursion on odd mounts
