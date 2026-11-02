@@ -1,5 +1,14 @@
 # 更新记录 / Changelog
 
+## v3.0.0-qiaomu.23 — 测试版 / Prerelease
+
+- 修复点击「移到归档文件夹」退出 KOReader：实机日志为 `attempt to call global 'move' (a nil value)`。归档函数调用了在其后才声明的局部函数，现改为前置声明，归档和恢复共用同一个局部移动函数。此前关于 fork 导致闪退的推测未获证实。
+- 归档目录在 KOReader 完成排序后移到列表最后，兼容目录与文件混合排序；保留返回上级入口和其余条目的顺序。
+- 从书架及手机传书选择器移除 `.azw3`：设备安装的 KOReader 只注册 `.azw`，没有注册 `.azw3`。之前仅根据容器家族认为可直接打开的判断有误；原有 AZW3 文件保留，可继续用 Kindle 原生阅读器打开。
+- 新增实际执行归档与恢复回调的回归：临时书籍与 sidecar 往返移动、历史与收藏更新、重名拒绝覆盖、移动失败以及排序与卸载恢复。
+
+English: fix the confirmed archive crash caused by a Lua forward-reference scope error (`move` resolved as a nil global). Reorder the archive after KOReader's own sort. Hide the unregistered `.azw3` suffix in the shelf and phone picker, preserving original files. Add callback-level regressions with real temporary file moves, metadata hooks, collision refusal, failed moves and sorting. The earlier fork-related crash hypothesis was not confirmed.
+
 ## v3.0.0-qiaomu.22 — 测试版 / Prerelease
 
 - 书架不再列出词典：Kindle 原生词典放在 `documents/dictionaries/`，里面是 `.azw` 文件，而 `.azw` 属于 KOReader 能打开的格式，所以之前被当成书列了出来。现在扫描书架时整棵跳过词典目录（`dictionaries`、`dict`、`dictionaries_ext`、`dict_ext`，不区分大小写），原生词典仍在 Kindle 自带阅读器里可用。

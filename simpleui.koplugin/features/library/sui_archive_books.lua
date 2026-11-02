@@ -134,6 +134,8 @@ end
 
 --- Moves `file` (with its sidecar, history and collection entries) into the
 --- archive folder. Returns ok, err.
+local move
+
 function Archive.archive(file)
     if type(file) ~= "string" or file == "" then return false, "no file" end
     if Archive.isArchived(file) then return false, "already archived" end
@@ -154,7 +156,7 @@ end
 -- Moves a book into `dest_dir`, carrying its sidecar along and updating the
 -- reading history and the collections, exactly like the file manager's
 -- paste does (see filemanager.lua's pasteFileFromClipboard).
-local function move(file, dest_dir)
+move = function(file, dest_dir)
     local name = ffiUtil.basename(file)
     if not name or name == "" then return false, "no name" end
     local dest_file = ffiUtil.joinPath(dest_dir, name)
@@ -164,8 +166,7 @@ local function move(file, dest_dir)
     end
 
     -- The move itself: the device's own mv binary, like FileManager:moveFile
-    -- (which uses /bin/mv, not a bare "mv" — the forked child inherits no
-    -- PATH of its own, so the absolute path is what actually resolves).
+    -- ffiUtil.execute uses execl, which requires an explicit binary path.
     if ffiUtil.execute(MV_BIN, "-f", file, dest_file) ~= 0 then
         logger.warn("simpleui archive: move failed", file, dest_file)
         return false, "move failed"
@@ -201,10 +202,7 @@ end
 
 local _orig_gen_item_table = nil
 
---- Patches FileChooser.genItemTable so the archive folder comes after every
---- other folder of the same directory. Folders and files are listed
---- separately by KOReader, so moving the folder to the end of `dirs` is
---- enough to place it last among the folders.
+--- Put the archive last after KOReader has sorted folders and files.
 function Archive.install()
     if _orig_gen_item_table then return end
     local ok, FileChooser = pcall(require, "ui/widget/filechooser")
@@ -219,25 +217,18 @@ function Archive.install()
 
     _orig_gen_item_table = FileChooser.genItemTable
     FileChooser.genItemTable = function(fc_self, dirs, files, path)
-        local name = Archive.folderName()
-        if type(dirs) == "table" and #dirs > 1 then
-            -- Match on the basename of the folder path, so the archive is
-            -- found wherever it sits (it is created in the library root).
-            local idx
-            for i = 1, #dirs do
-                local d = dirs[i]
-                local p = type(d) == "table" and d.path or nil
-                if p and ffiUtil.basename(p) == name then
-                    idx = i
+        local items = _orig_gen_item_table(fc_self, dirs, files, path)
+        local folder = Archive.folder()
+        if type(items) == "table" then
+            for i, item in ipairs(items) do
+                if item.path == folder and not item.is_go_up then
+                    table.remove(items, i)
+                    items[#items + 1] = item
                     break
                 end
             end
-            if idx and idx ~= #dirs then
-                local entry = table.remove(dirs, idx)
-                dirs[#dirs + 1] = entry
-            end
         end
-        return _orig_gen_item_table(fc_self, dirs, files, path)
+        return items
     end
 end
 

@@ -125,8 +125,9 @@ for ext in accept:gmatch("%.([%w]+)") do
     ext.." is offered by the upload page but the shelf cannot open it")
 end
 
+assert(not accept:find("azw3",1,true), "unregistered AZW3 suffix is not offered")
 assert(not accept:find("kfx",1,true), "KFX is not offered — KOReader cannot open it")
-assert(accept:find(".epub",1,true) and accept:find(".azw3",1,true),
+assert(accept:find(".epub",1,true) and accept:find(".azw",1,true),
   "the common formats stay offered")
 ''')
 

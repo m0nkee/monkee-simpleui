@@ -30,10 +30,10 @@ button.primary{background:var(--accent);color:var(--bg);border-color:var(--accen
 <h1>传书到 Kindle</h1>
 <p class="lead">选一本书，它会存进 Kindle 的 documents 文件夹，在书库里就能看到。</p>
 <section><h2>选择文件</h2>
-<input type="file" id="file" accept=".epub,.mobi,.azw3,.azw,.fb2,.fb3,.pdf,.xps,.djvu,.djv,.cbz,.cbt,.doc,.docx,.docm,.rtf,.odt,.txt,.md,.htm,.html,.xhtml,.xml,.chm,.pdb,.prc,.pptx,.xlsx">
+<input type="file" id="file" accept=".epub,.mobi,.azw,.fb2,.fb3,.pdf,.xps,.djvu,.djv,.cbz,.cbt,.doc,.docx,.docm,.rtf,.odt,.txt,.md,.htm,.html,.xhtml,.xml,.chm,.pdb,.prc,.pptx,.xlsx">
 <label for="subdir">保存到子文件夹（可留空）</label>
 <input id="subdir" placeholder="例如：小说" autocomplete="off">
-<p class="small">文件名会保留原样。KOReader 能打开的格式：EPUB、MOBI、AZW3、AZW、PDF、TXT、FB2、DJVU、CBZ、DOC、RTF 等。KFX 请用 Kindle 原生阅读。</p>
+<p class="small">文件名会保留原样。KOReader 能打开的格式：EPUB、MOBI、AZW、PDF、TXT、FB2、DJVU、CBZ、DOC、RTF 等。KFX、AZW3 请用 Kindle 原生阅读。</p>
 </section>
 <section><h2>将上传</h2><ul id="list"><li class="small">还没有选择文件</li></ul></section>
 <p class="note">页面只在 Kindle 显示二维码时可用，上传完成后自动关闭。家里的局域网内是普通 HTTP，请只在你信任的 Wi-Fi 下使用。</p>

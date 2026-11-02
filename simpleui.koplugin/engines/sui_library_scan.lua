@@ -49,21 +49,26 @@ end
 -- Notes:
 --   * .kfx is absent — KOReader cannot open KFX at all (Amazon's DRM
 --     container). KFX titles stay readable in the stock Kindle reader.
---   * .azw3 is listed even though KOReader registers only "azw": AZW3 is
---     the same MOBI/KF8 container family and CREngine opens it by content.
+--   * .azw3 is absent too, and that is not a mistake: upstream registers
+--     only "azw" (see credocument.lua). DocumentRegistry:hasProvider()
+--     matches the exact lowercased suffix — it never sniffs the content —
+--     so an ".azw3" file has no provider and KOReader answers "format
+--     not supported". AZW3 titles stay readable in the stock Kindle reader.
 --   * .cbr needs RAR support; libarchive on the Kindle build ships RAR5
 --     decoding, so it stays listed.
 --   * "*.zip" companions (fb2.zip, txt.zip, ...) are archive wrappers,
 --     not books, and are skipped.
+--   * .svg / .sh / .py / .htmlz are in upstream's registry but are images,
+--     scripts and edge cases rather than books, so they stay hidden.
 LibraryScan.BOOK_EXTS = {
     -- creDocument (crengine)
-    epub = true, mobi = true, azw3 = true, azw = true, fb2 = true, fb3 = true,
+    epub = true, mobi = true, azw = true, fb2 = true, fb3 = true,
     doc = true, docx = true, docm = true, rtf = true, txt = true, odt = true,
     htm = true, html = true, xhtml = true, xml = true, md = true, log = true,
-    chm = true, pdb = true, prc = true, tcr = true, cfb = true,
+    chm = true, pdb = true, prc = true, tcr = true,
     -- pdfDocument (mupdf)
     pdf = true, xps = true, cbz = true, cbr = true, cbt = true,
-    pptx = true, xlsx = true,
+    pptx = true, xlsx = true, cfb = true,
     -- djvuDocument
     djvu = true, djv = true,
 }
