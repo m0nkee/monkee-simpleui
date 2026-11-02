@@ -6593,3 +6593,33 @@ msgstr "頁面 5 分鐘後關閉，請在可信的 Wi-Fi 下使用。"
 
 msgid "Could not start the upload page."
 msgstr "無法開啟傳書頁面。"
+
+msgid "Move finished books to the archive"
+msgstr "把讀完的書移到封存資料夾"
+
+msgid "Archive folder"
+msgstr "封存資料夾"
+
+msgid "The folder finished books are moved into. It is created inside your library."
+msgstr "讀完的書會被移進這個資料夾，它會在書庫中自動建立。"
+
+msgid "Open the archive"
+msgstr "開啟封存資料夾"
+
+msgid "Move to the archive"
+msgstr "移到封存資料夾"
+
+msgid "Take out of the archive"
+msgstr "從封存資料夾取出"
+
+msgid "There is already a book with that name in the library."
+msgstr "書庫裡已有一本同名的書。"
+
+msgid "There is already a book with that name in the archive."
+msgstr "封存資料夾裡已有一本同名的書。"
+
+msgid "Could not move the book."
+msgstr "無法移動這本書。"
+
+msgid "Could not create the archive folder."
+msgstr "無法建立封存資料夾。"

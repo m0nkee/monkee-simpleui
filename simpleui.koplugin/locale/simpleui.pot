@@ -8209,3 +8209,43 @@ msgstr ""
 
 msgid "Could not start the upload page."
 msgstr ""
+
+#: features/library/sui_archive_books.lua
+msgid "Move finished books to the archive"
+msgstr ""
+
+#: features/library/sui_archive_books.lua
+msgid "Archive folder"
+msgstr ""
+
+#: features/library/sui_archive_books.lua
+msgid "The folder finished books are moved into. It is created inside your library."
+msgstr ""
+
+#: features/library/sui_archive_books.lua
+msgid "Open the archive"
+msgstr ""
+
+#: features/library/sui_archive_books.lua
+msgid "Move to the archive"
+msgstr ""
+
+#: features/library/sui_archive_books.lua
+msgid "Take out of the archive"
+msgstr ""
+
+#: features/library/sui_archive_books.lua
+msgid "There is already a book with that name in the library."
+msgstr ""
+
+#: features/library/sui_archive_books.lua
+msgid "There is already a book with that name in the archive."
+msgstr ""
+
+#: features/library/sui_archive_books.lua
+msgid "Could not move the book."
+msgstr ""
+
+#: features/library/sui_archive_books.lua
+msgid "Could not create the archive folder."
+msgstr ""

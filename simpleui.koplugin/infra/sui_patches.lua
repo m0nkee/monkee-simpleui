@@ -3189,6 +3189,15 @@ local function _onStatusChanged(file, doc_settings)
         if not (TBR and TBR.isAutoRemoveFinishedEnabled and TBR.removeTBR) then return end
         if TBR.isAutoRemoveFinishedEnabled() then TBR.removeTBR(file) end
     end)
+
+    -- A book that just reached "Finished" is put away in the archive
+    -- folder, so it leaves the shelf but keeps its sidecar (progress,
+    -- bookmarks, highlights) with it. Opt-out toggle in the library menu.
+    pcall(function()
+        local Archive = require("features/library/sui_archive_books")
+        if not Archive.isEnabled() then return end
+        Archive.archive(file)
+    end)
 end
 
 function M.patchStatusButtons(plugin)
@@ -5105,6 +5114,10 @@ function M.installAll(plugin)
     -- other code that customises the same widget can run unobstructed.
     local ok_bm, BM = pcall(require, "features/library/sui_library_browse")
     if ok_bm and BM and BM.isEnabled() then pcall(BM.install) end
+    -- Finished-book archive — sorts the archive folder last in the file
+    -- browser and tells the shelf scanner to skip its contents.
+    local ok_ar, AR = pcall(require, "features/library/sui_archive_books")
+    if ok_ar and AR then pcall(AR.install) end
     -- Wallpaper in FM and fullscreen overlay surfaces.
     M.patchWallpaperFM(plugin)
 
@@ -5254,6 +5267,8 @@ function M.teardownAll(plugin)
         end
         fmutil._simpleui_bookinfo_nav_patched = nil
     end
+    local ok_ar, AR = pcall(require, "features/library/sui_archive_books")
+    if ok_ar and AR then pcall(AR.uninstall) end
     M.unpatchStatusButtons(plugin)
     M.unpatchReaderMarkBook(plugin)
     M.unpatchBookStatusWidget(plugin)

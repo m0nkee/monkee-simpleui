@@ -122,6 +122,7 @@ function M.install(plugin)
         local FM = package.loaded["apps/filemanager/filemanager"]
         if FM and FM.instance then
             require("features/library/sui_hidden_books").registerHoldAction(FM.instance)
+            require("features/library/sui_archive_books").registerHoldAction(FM.instance)
         end
     end)
 end

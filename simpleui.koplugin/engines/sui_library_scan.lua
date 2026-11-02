@@ -83,6 +83,44 @@ local SYSTEM_DIR_NAMES = {
     ["lost+found"] = true,
 }
 
+-- Directories that hold dictionaries, not books. Matched on basename so it
+-- does not matter how deep in the library they sit.
+--   * "dictionaries" — the stock Kindle dictionary folder (documents/
+--     dictionaries) holding the Amazon .azw dictionaries. KOReader opens
+--     them like any other .azw, so the whitelist would have listed them
+--     as books.
+--   * "dict" — KOReader's own StarDict folder (koreader/data/dict) with
+--     the .ifo index files and their .idx/.dict data.
+--   * "dictionaries_ext" — the companion folder of user-installed
+--     dictionaries.
+local DICTIONARY_DIR_NAMES = {
+    dictionaries = true,
+    dict = true,
+    dictionaries_ext = true,
+    ["dict_ext"] = true,
+}
+
+-- Folders whose contents are not part of the shelf. The archive folder
+-- (features/library/sui_archive_books.lua) holds the books the reader
+-- finished; archiving is what takes them off the shelf, so the scan must
+-- not walk into it. Registered at runtime rather than hard-coded, because
+-- the folder's name is a user setting.
+local _skipped_dir_names = {}
+
+--- Registers a folder name whose subtree the scan does not list.
+--- Matching is on the basename, case-insensitively.
+function LibraryScan.skipDirName(name)
+    if type(name) ~= "string" or name == "" then return end
+    _skipped_dir_names[name:lower()] = true
+end
+
+--- Whether a folder name is skipped by the scan.
+function LibraryScan.isSkippedDirName(name)
+    if type(name) ~= "string" then return false end
+    local lower = name:lower()
+    return DICTIONARY_DIR_NAMES[lower] or _skipped_dir_names[lower] == true
+end
+
 -- _cache[home_dir] = { list = {{fp,mtime,size},...}, dirs = {[path]=mtime}, checked_at = os.time() }
 local _cache = {}
 
@@ -120,7 +158,10 @@ local function walk(dir, depth, out, dirs, state)
                     -- .sdr sidecars hold per-book metadata, not books, and
                     -- their mtime churns on every book close — descending
                     -- into them would falsely invalidate the cache below.
-                    if entry:sub(-4) ~= ".sdr" then
+                    -- Dictionary folders are skipped for the same reason:
+                    -- their contents are lookup data, not books.
+                    if entry:sub(-4) ~= ".sdr"
+                            and not LibraryScan.isSkippedDirName(entry) then
                         dirs[fp] = attr.modification or 0
                         walk(fp, depth + 1, out, dirs, state)
                     end

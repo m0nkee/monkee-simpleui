@@ -2933,7 +2933,13 @@ SimpleUIPlugin.addToMainMenu = function(self, menu_items)
         local ok_fc, FC = pcall(require, "features/library/sui_foldercovers")
         if not ok_fc or not FC then return {} end
 
-        return {
+        -- The archive rows (toggle, folder name, open) are appended after
+        -- the table below, so a failure to load the module cannot take the
+        -- rest of the library menu down with it.
+        local ok_ar, AR = pcall(require, "features/library/sui_archive_books")
+        local archive_items = (ok_ar and AR) and AR.makeMenuItems(ctx_menu) or {}
+
+        local items = {
             {
                 text = _("Favorites"),
                 callback = function()
@@ -3168,6 +3174,12 @@ SimpleUIPlugin.addToMainMenu = function(self, menu_items)
                 end,
             },
         }
+
+        -- The archive rows go last, after the library settings above.
+        for _i, item in ipairs(archive_items) do
+            items[#items + 1] = item
+        end
+        return items
     end
     plugin.makeLibraryMenuItems = makeLibraryMenuItems
 

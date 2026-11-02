@@ -6602,3 +6602,33 @@ msgstr "更新后即可阅读精选"
 
 msgid "Updating Qiaomu picks… Tap to cancel."
 msgstr "正在更新精选…点击取消。"
+
+msgid "Move finished books to the archive"
+msgstr "把读完的书移到归档文件夹"
+
+msgid "Archive folder"
+msgstr "归档文件夹"
+
+msgid "The folder finished books are moved into. It is created inside your library."
+msgstr "读完的书会被移进这个文件夹，它会在书库中自动创建。"
+
+msgid "Open the archive"
+msgstr "打开归档文件夹"
+
+msgid "Move to the archive"
+msgstr "移到归档文件夹"
+
+msgid "Take out of the archive"
+msgstr "从归档文件夹取出"
+
+msgid "There is already a book with that name in the library."
+msgstr "书库里已有一本同名的书。"
+
+msgid "There is already a book with that name in the archive."
+msgstr "归档文件夹里已有一本同名的书。"
+
+msgid "Could not move the book."
+msgstr "无法移动这本书。"
+
+msgid "Could not create the archive folder."
+msgstr "无法创建归档文件夹。"

@@ -155,3 +155,90 @@ end
 
 print('PASS: updater parses the prerelease release list, a failed check still '
       'throttles, the library scan lists only formats KOReader can open.')
+
+# --- Library scan: dictionary folders are skipped ---------------------------
+# The stock Kindle dictionary folder (documents/dictionaries) holds .azw
+# dictionaries. .azw is a format KOReader can open, so the whitelist listed
+# them as books on the shelf. They are lookup data, not books.
+lua.execute(r'''
+local Scan = require("engines/sui_library_scan")
+for _, name in ipairs({ "dictionaries", "Dictionaries", "dict", "dict_ext",
+                        "dictionaries_ext" }) do
+  assert(Scan.isSkippedDirName(name)==true, name.." is skipped — it holds dictionaries")
+end
+assert(Scan.isSkippedDirName("books")==false,"an ordinary folder is still scanned")
+assert(Scan.isSkippedDirName("Dictionaries")==true,"the match ignores case")
+
+-- A folder can be registered at runtime: the archive folder's name is a
+-- user setting, so the scanner must not hard-code it.
+assert(Scan.isSkippedDirName("Finished")==false,"an unregistered folder is scanned")
+Scan.skipDirName("Finished")
+assert(Scan.isSkippedDirName("Finished")==true,"a registered folder is skipped")
+assert(Scan.isSkippedDirName("finished")==true,"the registered name matches case-insensitively")
+Scan.skipDirName("Finished")
+Scan.skipDirName("")
+Scan.skipDirName(nil)
+assert(Scan.isSkippedDirName("")==false,"an empty name registers nothing")
+''')
+
+# --- Finished-book archive --------------------------------------------------
+# Finished books move into one real folder in the library, keeping their
+# sidecars; the folder sorts last in the file browser.
+lua.execute(r'''
+package.loaded["libs/libkoreader-lfs"] = {
+  attributes=function(path,what)
+    if what=="modification" then return 0 end
+    return { mode="file", modification=0, size=0 }
+  end,
+  dir=function() return function() end end,
+  mkdir=function() return true end,
+}
+package.loaded["ffi/util"] = {
+  basename=function(p) return (p:match("([^/]+)$")) or p end,
+  joinPath=function(a,b) return a.."/"..b end,
+  execute=function() return 0 end,
+}
+-- A tiny settings store: the archive toggle must round-trip through it.
+local _stored = {}
+package.loaded["infra/sui_store"] = {
+  get=function(_,k) return _stored[k] end,
+  set=function(_,k,v) _stored[k]=v end,
+  nilOrTrue=function(_,k) local v=_stored[k]; return v==nil or v==true end,
+}
+package.loaded["infra/sui_core"] = { Notify = { toast=function() end } }
+package.loaded["infra/sui_i18n"] = { translate=function(s) return s end }
+package.loaded["features/dialogs/sui_dialogs"] = {}
+package.loaded["device"] = { home_dir="/mnt/us", isAndroid=function() return false end }
+package.loaded["engines/sui_library_scan"] = {
+  resolveHomeDir=function() return "/mnt/us/documents" end,
+  invalidate=function() end,
+}
+local Archive = require("features/library/sui_archive_books")
+
+-- The default folder name, and that it lives inside the library.
+assert(Archive.folderName()=="Finished","the default archive folder is named Finished")
+assert(Archive.folder()=="/mnt/us/documents/Finished","the archive sits in the library folder")
+
+-- A path inside the archive is archived; one outside is not.
+assert(Archive.isArchived("/mnt/us/documents/Finished")==true,"the folder itself counts")
+assert(Archive.isArchived("/mnt/us/documents/Finished/book.epub")==true,"a book inside counts")
+assert(Archive.isArchived("/mnt/us/documents/book.epub")==false,"a book outside does not")
+assert(Archive.isArchived("")==false,"an empty path is not archived")
+assert(Archive.isArchived(nil)==false,"nil is not archived")
+
+-- A book that is already in the archive is not moved again.
+local ok, err = Archive.archive("/mnt/us/documents/Finished/book.epub")
+assert(ok==false and err=="already archived","a book in the archive is left alone")
+
+-- Archiving on finish is on by default and can be turned off.
+assert(Archive.isEnabled()==true,"finished books are archived by default")
+Archive.setEnabled(false)
+assert(Archive.isEnabled()==false,"the toggle turns archiving off")
+
+-- The menu rows exist: the toggle, the folder name and opening the folder.
+local items = Archive.makeMenuItems(nil)
+assert(type(items)=="table" and #items==3,"the archive contributes three menu rows")
+''')
+
+print('PASS: the library scan skips dictionary folders, and the finished-book '
+      'archive keeps its books in one folder inside the library.')

@@ -1,5 +1,14 @@
 # 更新记录 / Changelog
 
+## v3.0.0-qiaomu.22 — 测试版 / Prerelease
+
+- 书架不再列出词典：Kindle 原生词典放在 `documents/dictionaries/`，里面是 `.azw` 文件，而 `.azw` 属于 KOReader 能打开的格式，所以之前被当成书列了出来。现在扫描书架时整棵跳过词典目录（`dictionaries`、`dict`、`dictionaries_ext`、`dict_ext`，不区分大小写），原生词典仍在 Kindle 自带阅读器里可用。
+- 新增「读完的书归档」：读完的书自动移进书库里的一个真实文件夹（默认 `Finished`，可改名），进度、书签、批注等 `.sdr` 文件一起跟着走，书可以正常打开；书架网格不再列出归档文件夹里的书，原生文件浏览器里可以正常进入。
+- 归档文件夹在文件浏览器里排在同目录其他文件夹的最后；长按一本书可以「移到归档文件夹」或「从归档文件夹取出」；设置 → 书库里有开关、改名和「打开归档文件夹」三个入口。
+- 回归覆盖：词典目录名被跳过、运行时注册的跳过目录名生效、归档文件夹名与路径、归档判定、重复归档被拒绝、开关可切换、菜单行齐全。
+
+English: the shelf no longer lists dictionaries — the stock Kindle dictionaries live in `documents/dictionaries/` as `.azw` files, which KOReader can open, so they used to appear as books. The scanner now skips dictionary folders entirely (case-insensitively), leaving them readable in the stock Kindle reader. Finished books are collected into a real folder inside the library (default `Finished`, renameable), keeping their sidecars — progress, bookmarks and highlights — so they stay readable; the shelf no longer lists them, while the native file browser can still open the folder, which sorts last among its siblings. A long-press offers "Move to the archive" / "Take out of the archive", and Settings → Library holds the toggle, the folder name and "Open the archive".
+
 ## v3.0.0-qiaomu.21 — 测试版 / Prerelease
 
 - 书架只列出 KOReader 真能打开的格式：白名单改为对齐 KOReader 自己的文档注册表（`frontend/document/documentregistry.lua`），补齐 EPUB/MOBI/AZW3/AZW/FB2/FB3/DOC/DOCX/RTF/ODT/TXT/MD/HTML/CHM/PDB/PRC/DJVU/CBZ/CBR/XPS 等；`.kfx`、`.azk`、`.tpz` 等打不开的格式不再出现在书架上，点开也不会再报「格式不支持」。
