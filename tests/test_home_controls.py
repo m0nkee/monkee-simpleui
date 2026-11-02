@@ -8,7 +8,9 @@ functions=[re.search(r'function ScreenWidget:'+name+r'\([^\n]*\).*?\nend\n',engi
            for name in ['onScreenSwipe','_initLayout']]
 lua=LuaRuntime(unpack_returned_tuples=True)
 lua.globals().source='\n'.join(functions)
+lua.globals().plugin_root=str(ROOT)
 lua.execute('''
+package.path=plugin_root.."/?.lua;"..package.path
 ScreenWidget={}
 local function widget(o)
  o=o or {}

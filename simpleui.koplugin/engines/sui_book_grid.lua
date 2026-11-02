@@ -699,6 +699,10 @@ function GridRenderer.build(w, ctx, opts)
         return nil
     end
 
+    if opts.scrollable then
+        fps, grid_rows = require("engines/sui_library_stream").slice(ctx, id, fps, grid_cols)
+        max_items = grid_rows * grid_cols
+    end
     local page, npages, page_fps = _resolveCurrentPage(fps, ctx, id, max_items, opts.paged, true)
     local paged = opts.paged and #fps > max_items
     PageState.setCount(ctx, id, npages)
@@ -1060,6 +1064,15 @@ function GridRenderer.build(w, ctx, opts)
         content = swipe_area
     end
 
+    -- VerticalGroup does not record its painted coordinates. The scrolling
+    -- loader needs them to locate this grid within the larger home screen.
+    if opts.scrollable then
+        local size = content:getSize()
+        content = InputContainer:new{
+            dimen = Geom:new{ w = size.w, h = size.h },
+            content,
+        }
+    end
     local result = content
     -- Seed dimen so paintTo can fill absolute x/y in place. Needed for
     -- swipe hit-testing and partial refreshes when this widget is the
@@ -1079,6 +1092,7 @@ function GridRenderer.build(w, ctx, opts)
     result._row_progress_style  = progress_style
     result._row_uses_render_cell = opts.renderCell and true or false
     result._update_covers        = opts.updateCovers
+    if opts.scrollable then result._stream_row_stride = cell_h + row_gap end
     return result
 end
 
@@ -1188,6 +1202,9 @@ function GridRenderer.updateStats(widget, ctx, opts)
     -- this fast path succeeds instead of falling back to a full build().
     local grid_rows = opts.grid_rows or 1
     local grid_cols = opts.grid_cols or opts.max_items or 5
+    if opts.scrollable then
+        fps, grid_rows = require("engines/sui_library_stream").slice(ctx, id, fps, grid_cols)
+    end
     local max_items = grid_rows * grid_cols
     local _, npages, page_fps = _resolveCurrentPage(fps, ctx, id, max_items, opts.paged, false)
     PageState.setCount(ctx, id, npages)
@@ -1727,6 +1744,7 @@ function GridRenderer.makeModule(spec)
         max_items     = spec.max_items or 5,
         cache_key     = spec.cache_key,
         paged         = spec.paged,
+        scrollable    = spec.scrollable,
         filterItem    = spec.filterItem,
         labelForItem  = spec.labelForItem,
         progress_style = progress_style,
@@ -1754,7 +1772,12 @@ function GridRenderer.makeModule(spec)
     -- only the column count is user-editable. Use this instead of
     -- spec.grid whenever a module is a single "cover row" that should not
     -- gain pagination/multi-row layout.
-    local function _gridDims(pfx)
+    local function _gridDims(pfx, ctx)
+        if spec.scrollable then
+            local cols = GridRenderer.getGridCols(pfx, id, spec.default_cols or spec.max_items)
+            local state = require("engines/sui_library_stream").state(ctx or {}, id, cols)
+            return state.rows, cols
+        end
         if spec.grid then
             return GridRenderer.getGridRows(pfx, id, spec.default_rows),
                    GridRenderer.getGridCols(pfx, id, spec.default_cols or spec.max_items)
@@ -1780,7 +1803,7 @@ function GridRenderer.makeModule(spec)
         row_opts.renderCell    = cell and cell.renderCell    or spec.renderCell
         row_opts.getCellHeight = cell and cell.getCellHeight or spec.getCellHeight
         row_opts.updateCovers  = cell and cell.updateCovers  or spec.updateCovers
-        row_opts.grid_rows, row_opts.grid_cols = _gridDims(ctx.pfx)
+        row_opts.grid_rows, row_opts.grid_cols = _gridDims(ctx.pfx, ctx)
         -- Read at build time (not once in makeModule) so a change made in
         -- the "Long press on cover" submenu takes effect on the next repaint.
         row_opts.hold_mode = Config.getCoverHoldMode(id, ctx.pfx)
@@ -1798,7 +1821,7 @@ function GridRenderer.makeModule(spec)
     end
 
     local function _heightOpts(ctx)
-        local grid_rows, grid_cols = _gridDims(ctx and ctx.pfx)
+        local grid_rows, grid_cols = _gridDims(ctx and ctx.pfx, ctx)
         return {
             id             = id,
             progress_style = progress_style,

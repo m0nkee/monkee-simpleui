@@ -1526,6 +1526,7 @@ function ScreenWidget:_initLayout()
         if ges.direction ~= "north" and ges.direction ~= "south" then return false end
         return ScrollableContainer.onScrollableSwipe(self, args, ges)
     end
+    require("engines/sui_library_stream").attach(scroll, self)
     function scroll:getCropRegion()
         if self._is_scrollable ~= true then return Geom:new(self.dimen) end
         return ScrollableContainer.getCropRegion(self)

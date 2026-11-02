@@ -1,5 +1,14 @@
 # 更新记录 / Changelog
 
+## v3.0.0-qiaomu.24 — 测试版 / Prerelease
+
+- 书架改为纵向滑动浏览，接近底部时自动加载下一批，取消书架的手动翻页箭头；其他模块的翻页方式保持原有设置。
+- 初次加载 6 行，每批追加 3 行，最多保留 12 行封面控件；浏览更远的书时回收前面的行，上滑可加载回来。加载前后按行高修正滚动位置，保留当前视野。
+- 复用当前文件列表，加载更多时不重新扫描书库；列数仍可配置，排序、列表变化及旋转后的列数变化会重新计算可见窗口。
+- 回归覆盖 1003 本书的完整往返浏览、尾行、空列表、缓存复用、加载期间的连续手势、滚动位置和切页取消；实际网格构建代码验证了加载批次与可见书籍一致。实机滑动体验仍需重启后验收。
+
+English: browse the bookshelf vertically with lazy row loading instead of page arrows. Start with six rows, load three at a time, and retain at most twelve rows of cover widgets; preceding rows can be loaded again when scrolling back. Preserve the visible anchor and reuse the file list. Regression coverage includes full traversal of 1003 books, bounded windows, final rows, cancellation and the shipped grid builder. Device interaction remains pending restart validation.
+
 ## v3.0.0-qiaomu.23 — 测试版 / Prerelease
 
 - 修复点击「移到归档文件夹」退出 KOReader：实机日志为 `attempt to call global 'move' (a nil value)`。归档函数调用了在其后才声明的局部函数，现改为前置声明，归档和恢复共用同一个局部移动函数。此前关于 fork 导致闪退的推测未获证实。

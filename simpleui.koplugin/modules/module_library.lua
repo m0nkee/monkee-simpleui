@@ -288,7 +288,8 @@ local mod = GridRenderer.makeModule{
     default_on  = false,
     is_book_mod = true,   -- surgical repaint on swipe between pages; suppresses the generic empty-state
     max_items   = MAX_ITEMS,
-    paged       = true,   -- the whole library, almost certainly more than one page
+    paged       = false,
+    scrollable  = true,
 
     getFileList = function(ctx) return getFileList(ctx) end,
 
@@ -308,9 +309,8 @@ local mod = GridRenderer.makeModule{
 
     extra_menu_items_before = extraMenuItemsBefore,
 
-    -- Configurable grid (Rows 1-3 × Columns 4-5) + swipe pagination —
-    -- the whole library rarely fits on a single row.
-    grid          = true,
+    -- Columns remain configurable; vertical browsing loads rows on demand.
+    cols_choice   = true,
     default_rows  = 1,
     default_cols  = MAX_ITEMS,
 
